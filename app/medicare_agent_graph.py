@@ -1,46 +1,48 @@
-import os
 from typing import TypedDict, Annotated, Any, Dict
 from pprint import pprint
 
+from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
 
-from langchain_core.messages import BaseMessage, AIMessage, HumanMessage
-
-from langgraph.graph import MessagesState, StateGraph, END
-from langgraph.graph.message import add_messages
+from langgraph.graph import MessagesState, StateGraph,END
 
 # project internal imports
-from .constants import PLANNER_AGENT
-from .server_models import InvokeRequest
+from app.node_functions.node_functions import uw_agent_reason,MessageGraph
+from app.node_functions.chains.tools.models.constants import UW_AGENT_REASON,LAST,UW_TOOL_NODE
+from app.node_functions.node_functions import uw_tool_node
 
-# -----------------------------------imports complete -----------------------------
 
 
-# Define the State
-class MessageGraph(TypedDict):
-    messages: Annotated[list[BaseMessage], add_messages]
+def should_continue(state: MessagesState) -> str:
+    if not state["messages"][LAST].tool_calls:
+        return END
+    return UW_TOOL_NODE
 
-def planner_agent(state: MessageGraph):
-    return {"messages": [AIMessage(content="this is a mock response form an agent. to test if API is hosted successfully in aws")]}
 
-# define the graph flow
-flow = StateGraph(MessagesState)
-flow.add_node(PLANNER_AGENT, planner_agent)
-flow.set_entry_point(PLANNER_AGENT)
-flow.add_edge(PLANNER_AGENT,END)
+medicare_graph = StateGraph(MessagesState)
+medicare_graph.add_node(UW_AGENT_REASON, uw_agent_reason)
+medicare_graph.add_node(UW_TOOL_NODE, uw_tool_node)
+medicare_graph.set_entry_point(UW_AGENT_REASON)
 
-# compile the graph
-uw_flow = flow.compile()
-uw_flow.get_graph().draw_mermaid_png(output_file_path="uw_flow.png")
+medicare_graph.add_conditional_edges(UW_AGENT_REASON, should_continue, {
+    END:END,
+    UW_TOOL_NODE:UW_TOOL_NODE})
+medicare_graph.add_edge(UW_TOOL_NODE, UW_AGENT_REASON)
 
-# function to invoke the graph and transform the response
-def run_medicare_agent(InvokeRequest : InvokeRequest) -> Dict[str, Any]:
-    result = uw_flow.invoke({"messages": [HumanMessage(
-        content= " my query")]}) #, config=InvokeRequest["config"])
-    return result["messages"]
+medicare_graph = medicare_graph.compile()
+medicare_graph.get_graph().draw_mermaid_png(output_file_path="medicare_flow.png")
+
+
+
+# def run_graph(query: str) -> Dict[str, Any]:
+def run_graph(query: str) -> MessageGraph:
+    result = medicare_graph.invoke({"messages": [HumanMessage(
+        content=query)]})
+    answer = result["messages"][LAST].content
+    return result
 
 if __name__ == "__main__":
-    print("Hello from Medicare agent")
-    query = "hello from the user"
-    res = run_medicare_agent({"query": query, "thread_id": "INC1234"})
-    pprint(res)
-
+    print("Hello from Medicare Agent")
+    query = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026."
+    result = run_graph(query)
+    pprint(result)
+    # pprint(result["answer"])

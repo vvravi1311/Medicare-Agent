@@ -3,7 +3,7 @@ from pprint import pprint
 from fastapi import FastAPI
 
 # project imports
-from .medicare_agent_graph import run_medicare_agent
+from .medicare_agent_graph_dummy import run_medicare_agent
 from .server_models import InvokeRequest
 
 
