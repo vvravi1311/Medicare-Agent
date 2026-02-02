@@ -9,7 +9,8 @@ import json
 # project internal imports
 from app.node_functions.chains.uw_chain import uw_chain
 from app.node_functions.chains.categorize_chain import categorize_chain
-from app.node_functions.chains.tools.tools import uw_tools
+from app.node_functions.chains.product_chain import product_grounding_chain,product_rag_chain
+from app.node_functions.chains.tools.tools import uw_tools,product_rag_tools
 from app.node_functions.chains.tools.models.constants import LAST,FIRST
 
 # class MessageGraph(TypedDict):
@@ -33,11 +34,42 @@ def categorize_agent_reason(state: MedicareMessageGraph):
 
 def product_agent_reason(state: MedicareMessageGraph):
     # add product code here
-    return {"messages": [AIMessage(content="this is a mock, need to include the RAG agent call")]}
+    return {"messages": [product_rag_chain.invoke({"product_rag_messages": state["messages"]})]}
 
 def uw_agent_reason(state: MedicareMessageGraph):
     # write code to update the agent response in the State Message
     return {"messages": [uw_chain.invoke({"uw_messages": state["messages"]})]}
 
+
+def has_tool_message(result):
+    # Case 1: result is a single message
+    if hasattr(result, "tool_calls") and result.tool_calls:
+        return True
+    # Case 2: result is a dict with messages
+    if isinstance(result, dict) and "messages" in result:
+        for msg in result["messages"]:
+            if getattr(msg, "type", None) == "tool":
+                return True
+            if hasattr(msg, "tool_calls") and msg.tool_calls:
+                return True
+    return False
+
+def product_grounding_reason(state: MedicareMessageGraph):
+    question = state.get("user_query")
+    answer = state.get("messages")[LAST].content
+    context = ""
+    if has_tool_message(state.get("messages")):
+        tool_msg = next(msg for msg in state["messages"] if isinstance(msg, ToolMessage))
+        context = tool_msg.content
+    print("***********************      question, answer, context     *****************************")
+    print(question, answer, context)
+    return {
+        "messages": [product_grounding_chain.invoke({
+            "question": state["messages"],
+            "context": context,
+            "answer": answer})]
+    }
+
 # defining the tool_nodes
 uw_tool_node = ToolNode(uw_tools)
+product_tool_node=ToolNode(product_rag_tools)

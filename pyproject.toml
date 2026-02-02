@@ -10,6 +10,7 @@ dependencies = [
     "langchain-community>=0.4.1",
     "langchain-core>=1.2.7",
     "langchain-openai>=1.1.7",
+    "langchain-pinecone>=0.2.13",
     "langgraph>=1.0.7",
     "python-dateutil>=2.9.0.post0",
     "uvicorn>=0.40.0",
