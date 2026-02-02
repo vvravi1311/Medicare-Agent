@@ -66,7 +66,7 @@ class Health(BaseModel):
     conditions: List[str] = Field(
         default_factory=list, description="List of disclosed medical conditions"
     )
-    medications: List[str] = Field(
+    medications: c[str] = Field(
         default_factory=list, description="List of current medications"
     )
     oxygenUse: Optional[bool] = Field(False, description="Whether the applicant uses oxygen")

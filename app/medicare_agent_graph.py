@@ -34,8 +34,9 @@ def after_categorize_router(state: MedicareMessageGraph):
 #     else:
 #         return END
 
-def after_product_router(state: MessagesState) -> str:
+def after_product_router(state: MedicareMessageGraph) -> str:
     if not state["messages"][LAST].tool_calls:
+    # if not isinstance(state["messages"][LAST], ToolMessage):
         category = state.get("agent_category")
         if category == "PRODUCT":
             return PRODUCT_GROUNDING_REASON
@@ -46,7 +47,7 @@ def after_product_router(state: MessagesState) -> str:
         # return RAG_GROUNDING_REASON
     return PRODUCT_TOOL_NODE
 
-def after_uw_router(state: MessagesState) -> str:
+def after_uw_router(state: MedicareMessageGraph) -> str:
     if not state["messages"][LAST].tool_calls:
         return END
     return UW_TOOL_NODE
