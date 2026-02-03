@@ -90,7 +90,7 @@ medicare_graph.add_conditional_edges(PRODUCT_GROUNDING_REASON,after_grounded_rou
 })
 
 medicare_graph = medicare_graph.compile()
-medicare_graph.get_graph().draw_mermaid_png(output_file_path="medicare_flow_2.png")
+medicare_graph.get_graph().draw_mermaid_png(output_file_path="medicare_flow_3.png")
 
 # def run_graph(query: str) -> Dict[str, Any]:
 def run_graph(query: str) -> MedicareMessageGraph:
