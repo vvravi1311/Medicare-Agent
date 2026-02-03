@@ -101,13 +101,14 @@ def run_graph(query: str) -> MedicareMessageGraph:
 
 if __name__ == "__main__":
     print("Hello from Medicare Agent")
-    uw_query = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026."
-    # product_query = "I’m looking at Plan N and Plan G. If my doctor does not accept 'assignment' and charges more than the Medicare-approved amount, which plan protects me from the balance bill"
-    product_query = "Details of Plan N "
+    uw_query_1 = "a 67‑year‑old applicant who: Just left an employer group plan last month , Has several health conditions (COPD, diabetes, uses insulin) , Wants to enroll in Medigap Plan G , Has been on Medicare Part B for 18 months , Has no recent GI events except losing employer coverage , Has a hospitalization 45 days ago ,Uses oxygen at night. My question is - Does this client qualify for Guaranteed Issue because they just lost employer coverage, or do I need to submit them through full underwriting?"
+    uw_query = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026. Applicant is 65 years old, no prior coverage and no major health history"
+    product_query_1 = "Explain Plan G"
+    product_query_2 ="If I have Plan N, how much do I pay for an emergency room visit if I am admitted to the hospital?"
     combined_query="yet to add one"
     dummy_query = "hi"
 
-    result = run_graph(uw_query)
+    result = run_graph(uw_query_1)
     print("************************************************************************************ : Result")
     pprint(result)
     # pprint(result["answer"])

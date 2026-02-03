@@ -10,7 +10,11 @@ from langgraph.graph.message import add_messages
 class Audit(BaseModel):
     source:Optional[str]
     page_number:Optional[str]
+    audit_info: Dict[str, Any]
 class ProductAgentResponse(BaseModel):
+    answer: Optional[str] = ""
+    audit: Optional[List[Audit]] = Field(default_factory=list)
+class AnyAgentResponse(BaseModel):
     answer: Optional[str] = ""
     audit: Optional[List[Audit]] = Field(default_factory=list)
 class GroundingAgentResponse(BaseModel):
@@ -25,6 +29,6 @@ class MedicareMessageGraph(TypedDict):
     agent_category: Optional[str]
     # Output from the product agent
     product_response: Optional[ProductAgentResponse]
-    # Output from the eligibility/underwriting agent
-    underwriting_response: Optional[str]
     grounding_agent_response: Optional[GroundingAgentResponse]
+    # Output from the eligibility/underwriting agent
+    underwriting_response: Optional[AnyAgentResponse]

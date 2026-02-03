@@ -14,7 +14,7 @@ from app.node_functions.chains.categorize_chain import categorize_chain
 from app.node_functions.chains.product_chain import product_grounding_chain,product_rag_chain
 from app.node_functions.chains.tools.tools import uw_tools,product_rag_tools
 from app.node_functions.chains.tools.models.constants import LAST,FIRST
-from app.node_functions.chains.tools.models.state_graph_models import MedicareMessageGraph,ProductAgentResponse,GroundingAgentResponse
+from app.node_functions.chains.tools.models.state_graph_models import MedicareMessageGraph,ProductAgentResponse,GroundingAgentResponse,AnyAgentResponse
 
 
 def categorize_agent_reason(state: MedicareMessageGraph):
@@ -24,24 +24,25 @@ def categorize_agent_reason(state: MedicareMessageGraph):
 def product_agent_reason(state: MedicareMessageGraph):
     response = product_rag_chain.invoke({"product_rag_messages": state["messages"]})
     if isinstance(state["messages"][LAST], ToolMessage):
-        product_agent_response = ProductAgentResponse()
-        product_agent_response.answer = response.content
+        # product_agent_response = ProductAgentResponse()
+        answer = response.content
+        audit = []
         for artifact in state["messages"][LAST].artifact:
-            product_agent_response.audit.append({
+            audit.append({
                 "source": artifact.metadata["source"],
                 "page_number": artifact.metadata["MY_page_number"]
             })
-        # return {"messages": [product_rag_chain.invoke({"product_rag_messages": state["messages"]})],
-        #         "product_response": product_agent_response}
         return {"messages": [response],
-                "product_response": product_agent_response}
-
-    return {"messages": [response]}
-    # return {"messages": [product_rag_chain.invoke({"product_rag_messages": state["messages"]})]}
+                "product_response": {"answer":response.content, "Audit":audit}} # When the product agent responds with final answer
+    return {"messages": [response]} # first time when the agent decides to call the tool
 
 def uw_agent_reason(state: MedicareMessageGraph):
-    # write code to update the agent response in the State Message
-    return {"messages": [uw_chain.invoke({"uw_messages": state["messages"]})]}
+    response = uw_chain.invoke({"uw_messages": state["messages"]})
+    answer = response.content
+    if isinstance(state["messages"][LAST], ToolMessage):
+        answer = response.content
+        return {"messages": [response],"underwriting_response": {"answer":response.content}}
+    return {"messages": [response],"underwriting_response": {"answer":response.content,"audit":[{"dummy-audit": "some value"}]}}
 
 def has_tool_message(result):
     # Case 1: result is a single message
