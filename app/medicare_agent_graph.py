@@ -41,11 +41,18 @@ def after_product_router(state: MedicareMessageGraph) -> str:
         if category == "PRODUCT":
             return PRODUCT_GROUNDING_REASON
         elif category == "BOTH":
-            return UW_AGENT_REASON
+            return PRODUCT_GROUNDING_REASON
         else:
             return END
-        # return RAG_GROUNDING_REASON
     return PRODUCT_TOOL_NODE
+def after_grounded_router(state: MedicareMessageGraph) -> str:
+    category = state.get("agent_category")
+    if category == "PRODUCT":
+        return END
+    elif category == "BOTH":
+        return UW_AGENT_REASON
+    else:
+        return END
 
 def after_uw_router(state: MedicareMessageGraph) -> str:
     if not state["messages"][LAST].tool_calls:
@@ -70,15 +77,17 @@ medicare_graph.add_conditional_edges(CATEGORIZE_AGENT_REASON, after_categorize_r
     BOTH:PRODUCT_AGENT_REASON})
 medicare_graph.add_conditional_edges(PRODUCT_AGENT_REASON, after_product_router, {
     END:END,
-    UW_AGENT_REASON:UW_AGENT_REASON,
     PRODUCT_GROUNDING_REASON:PRODUCT_GROUNDING_REASON,
     PRODUCT_TOOL_NODE:PRODUCT_TOOL_NODE})
 medicare_graph.add_conditional_edges(UW_AGENT_REASON, after_uw_router, {
     END:END,
     UW_TOOL_NODE:UW_TOOL_NODE})
-medicare_graph.add_edge(PRODUCT_GROUNDING_REASON,END)
 medicare_graph.add_edge(UW_TOOL_NODE, UW_AGENT_REASON)
 medicare_graph.add_edge(PRODUCT_TOOL_NODE, PRODUCT_AGENT_REASON)
+medicare_graph.add_conditional_edges(PRODUCT_GROUNDING_REASON,after_grounded_router, {
+    END:END,
+    UW_AGENT_REASON:UW_AGENT_REASON
+})
 
 medicare_graph = medicare_graph.compile()
 medicare_graph.get_graph().draw_mermaid_png(output_file_path="medicare_flow_2.png")
@@ -93,8 +102,8 @@ def run_graph(query: str) -> MedicareMessageGraph:
 if __name__ == "__main__":
     print("Hello from Medicare Agent")
     uw_query = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026."
-    # product_query = "I’m looking at Plan N and Plan G. If my doctor does not accept 'assignment' and charges more than the Medicare-approved amount, which plan protects me from the balance bill"
-    product_query = "Details of Plan N "
+    product_query = "I’m looking at Plan N and Plan G. If my doctor does not accept 'assignment' and charges more than the Medicare-approved amount, which plan protects me from the balance bill"
+    # product_query = "Details of Plan N "
 
     combined_query="yet to add one"
     dummy_query = "hi"

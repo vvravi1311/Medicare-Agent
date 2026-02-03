@@ -7,6 +7,7 @@ from langchain_openai import ChatOpenAI
 # project internal imports
 from app.node_functions.chains.tools.models.constants import LAST,FIRST,PRODUCT_AGENT_MODEL,PRODUCT_GROUNDING_MODEL
 from app.node_functions.chains.tools.tools import product_rag_tools
+from app.node_functions.chains.tools.models.state_graph_models import GroundingAgentResponse
 
 
 product_rag_prompt = ChatPromptTemplate.from_messages(
@@ -40,7 +41,7 @@ product_grounding_prompt = ChatPromptTemplate.from_messages(
     - Determine whether the candidate answer is fully supported by the provided context.
     - If the answer contains any information that is not explicitly supported by the context, mark it as NOT GROUNDED.
     - If the answer is grounded, return it unchanged.
-    - If the answer is not grounded, rewrite a corrected answer using ONLY the information found in the context. If the context does not contain enough information, respond with: "The context does not provide enough information to answer this question."
+    - If the answer is not grounded, rewrite a corrected answer using ONLY the information found in the context. If the context does not contain enough information, respond with: "The context does not provide enough information to answer this question. PLease call Helpdesk"
 
     Rules:
     - Do NOT add new facts.
@@ -68,7 +69,8 @@ product_grounding_prompt = ChatPromptTemplate.from_messages(
         # MessagesPlaceholder(variable_name="product_grounding_messages"),
     ]
 )
-product_grounding_llm = ChatOpenAI(model=PRODUCT_GROUNDING_MODEL, temperature=0)
+# product_grounding_llm = ChatOpenAI(model=PRODUCT_GROUNDING_MODEL, temperature=0)
+product_grounding_llm = ChatOpenAI(model=PRODUCT_GROUNDING_MODEL, temperature=0).with_structured_output(GroundingAgentResponse)
 product_grounding_chain = (
         {
             "question": lambda x: x["question"],
