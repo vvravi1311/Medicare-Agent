@@ -102,13 +102,12 @@ def run_graph(query: str) -> MedicareMessageGraph:
 if __name__ == "__main__":
     print("Hello from Medicare Agent")
     uw_query = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026."
-    product_query = "I’m looking at Plan N and Plan G. If my doctor does not accept 'assignment' and charges more than the Medicare-approved amount, which plan protects me from the balance bill"
-    # product_query = "Details of Plan N "
-
+    # product_query = "I’m looking at Plan N and Plan G. If my doctor does not accept 'assignment' and charges more than the Medicare-approved amount, which plan protects me from the balance bill"
+    product_query = "Details of Plan N "
     combined_query="yet to add one"
     dummy_query = "hi"
 
-    result = run_graph(product_query)
+    result = run_graph(uw_query)
     print("************************************************************************************ : Result")
     pprint(result)
     # pprint(result["answer"])

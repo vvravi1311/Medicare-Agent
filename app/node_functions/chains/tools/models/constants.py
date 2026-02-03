@@ -5,9 +5,9 @@ PLANNER_AGENT = "planner_agent"
 
 
 # model used for the chains
-MEDICARE_MODEL="gpt-3.5-turbo"
-RAG_EMBEDDING_MODEL="text-embedding-3-small"
-UW_AGENT_MODEL="gpt-3.5-turbo"
+# MEDICARE_MODEL="gpt-3.5-turbo"
+# RAG_EMBEDDING_MODEL="text-embedding-3-small"
+UW_AGENT_MODEL="gpt-4o-mini"
 CATEGORIZE_AGENT_MODEL="gpt-3.5-turbo"
 PRODUCT_AGENT_MODEL="gpt-3.5-turbo"
 PRODUCT_GROUNDING_MODEL="gpt-4o-mini"

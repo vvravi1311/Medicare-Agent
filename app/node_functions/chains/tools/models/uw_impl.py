@@ -7,6 +7,8 @@ from .uw_models import (
     EvaluateRequest, WaitingPeriod, RatingGuidance
 )
 
+from langchain_core.tools import tool
+
 # In-memory decision store for demo purposes
 _DECISIONS: Dict[str, dict] = {}
 
@@ -81,6 +83,7 @@ def _rating_guidance(tobacco: bool | None, height: int | None, weight: int | Non
             cls, factor = 'PREFERRED', 1.0
     return RatingGuidance(**{"class": cls}, suggestedFactor=factor)
 
+@tool()
 def evaluate(payload: EvaluateRequest) -> dict:
     """
         Evaluate a Medicare application and return an underwriting decision.
