@@ -5,9 +5,9 @@ from typing import Optional, List, Literal
 
 
 class Application(BaseModel):
-    applicationId: Optional[str] = Field(..., description="Unique identifier for the application")
-    receivedDate: Optional[str] = Field(..., description="Date the application was received (YYYY-MM-DD)")
-    requestedEffectiveDate: Optional[str] = Field(..., description="Requested policy effective date")
+    applicationId: str = Field(..., description="Unique identifier for the application")
+    receivedDate: str = Field(..., description="Date the application was received (YYYY-MM-DD)")
+    requestedEffectiveDate: str = Field(..., description="Requested policy effective date")
     channel: Optional[Literal['AGENT','BROKER','DIRECT','MGA']] = Field(
         'AGENT', description="Sales channel through which the application was submitted"
     )
@@ -18,14 +18,14 @@ class Application(BaseModel):
 class Applicant(BaseModel):
     firstName: Optional[str] = Field(None, description="Applicant's first name")
     lastName: Optional[str] = Field(None, description="Applicant's last name")
-    dateOfBirth: Optional[str] = Field(..., description="Applicant's date of birth (YYYY-MM-DD)")
-    state: Optional[str] = Field(..., description="State of residence (2-letter code)")
+    dateOfBirth: str = Field(..., description="Applicant's date of birth (YYYY-MM-DD)")
+    state: str = Field(..., description="State of residence (2-letter code)")
     zip: Optional[str] = Field(None, description="ZIP code of residence")
     tobaccoUse: Optional[bool] = Field(False, description="Whether the applicant uses tobacco")
     heightInches: Optional[int] = Field(None, description="Height in inches (used for BMI)")
     weightPounds: Optional[int] = Field(None, description="Weight in pounds (used for BMI)")
-    partAEffectiveDate: Optional[str] = Field(..., description="Medicare Part A effective date")
-    partBEffectiveDate: Optional[str] = Field(..., description="Medicare Part B effective date")
+    partAEffectiveDate: str = Field(..., description="Medicare Part A effective date")
+    partBEffectiveDate: str = Field(..., description="Medicare Part B effective date")
     currentlyOnMA: Optional[bool] = Field(
         False, description="Whether the applicant is currently enrolled in Medicare Advantage"
     )
@@ -38,9 +38,9 @@ class Applicant(BaseModel):
 
 
 class Coverage(BaseModel):
-    requestedPlanLetter: Optional[Literal[
+    requestedPlanLetter: Literal[
         'A','B','C','D','F','G','K','L','M','N','HDG','HDF'
-    ]] = Field(..., description="Requested Medigap plan letter")
+    ] = Field(..., description="Requested Medigap plan letter")
     replacingCoverage: Optional[bool] = Field(
         False, description="Whether the applicant is replacing existing coverage"
     )
@@ -56,17 +56,17 @@ class Coverage(BaseModel):
 
 
 class RecentHospitalization(BaseModel):
-    occurred: Optional[bool] = Field(False, description="Whether a recent hospitalization occurred")
+    occurred: bool = Field(False, description="Whether a recent hospitalization occurred")
     dischargeDate: Optional[str] = Field(
         None, description="Date of hospital discharge, if applicable"
     )
 
 
 class Health(BaseModel):
-    conditions: Optional[List[str]] = Field(
+    conditions: List[str] = Field(
         default_factory=list, description="List of disclosed medical conditions"
     )
-    medications: Optional[str] = Field(
+    medications: List[str] = Field(
         default_factory=list, description="List of current medications"
     )
     oxygenUse: Optional[bool] = Field(False, description="Whether the applicant uses oxygen")
@@ -80,19 +80,19 @@ class Health(BaseModel):
 
 
 class GiEvent(BaseModel):
-    type: Optional[Literal[
+    type: Literal[
         'MA_PLAN_TERMINATION','MA_MOVE_OUT_OF_SERVICE_AREA','MA_TRIAL_RIGHT_WITHIN_12M',
         'EMPLOYER_GROUP_ENDING','MEDIGAP_INSOLVENCY','SELECT_MOVE_OUT_OF_AREA',
         'CARRIER_RULE_VIOLATION_OR_MISLEADING'
-    ]] = Field(..., description="Type of Guaranteed Issue qualifying event")
-    triggeringDate: Optional[str] = Field(..., description="Date the GI event occurred")
+    ] = Field(..., description="Type of Guaranteed Issue qualifying event")
+    triggeringDate: str = Field(..., description="Date the GI event occurred")
 
 
 class EvaluateRequest(BaseModel):
-    application: Optional[Application] = Field(..., description="Application metadata")
-    applicant: Optional[Applicant] = Field(..., description="Applicant demographic and Medicare details")
-    coverage: Optional[Coverage] = Field(..., description="Requested coverage information")
-    giEvents: Optional[List[GiEvent]] = Field(
+    application: Application = Field(..., description="Application metadata")
+    applicant: Applicant = Field(..., description="Applicant demographic and Medicare details")
+    coverage: Coverage = Field(..., description="Requested coverage information")
+    giEvents: List[GiEvent] = Field(
         default_factory=list, description="List of applicable GI events"
     )
     health: Optional[Health] = Field(
@@ -104,29 +104,29 @@ class EvaluateRequest(BaseModel):
 
 
 class Reason(BaseModel):
-    code: Optional[str] = Field(..., description="Machine-readable reason code")
-    message: Optional[str] = Field(..., description="Human-readable explanation")
+    code: str = Field(..., description="Machine-readable reason code")
+    message: str = Field(..., description="Human-readable explanation")
 
 
 class RuleAudit(BaseModel):
-    ruleId: Optional[str] = Field(..., description="Identifier of the evaluated rule")
-    outcome: Optional[Literal['FIRED','SKIPPED']] = Field(..., description="Rule evaluation outcome")
+    ruleId: str = Field(..., description="Identifier of the evaluated rule")
+    outcome: Literal['FIRED','SKIPPED'] = Field(..., description="Rule evaluation outcome")
     details: Optional[str] = Field(None, description="Additional rule evaluation details")
 
 
 class PlanRestrictions(BaseModel):
-    allowedPlanLetters: Optional[List[str]] = Field(
+    allowedPlanLetters: List[str] = Field(
         default_factory=list, description="Plans the applicant is eligible for"
     )
-    disallowedPlanLetters: Optional[List[str]] = Field(
+    disallowedPlanLetters: List[str] = Field(
         default_factory=list, description="Plans the applicant is not eligible for"
     )
-    notes: Optional[List[str]] = Field(default_factory=list, description="Additional notes")
+    notes: List[str] = Field(default_factory=list, description="Additional notes")
 
 
 class WaitingPeriod(BaseModel):
-    applies: Optional[bool] = Field(False, description="Whether a waiting period applies")
-    months: Optional[int] = Field(0, description="Length of the waiting period in months")
+    applies: bool = Field(False, description="Whether a waiting period applies")
+    months: int = Field(0, description="Length of the waiting period in months")
     reason: Optional[str] = Field(None, description="Explanation for the waiting period")
 
 
@@ -140,26 +140,26 @@ class RatingGuidance(BaseModel):
 
 
 class EvaluateResponse(BaseModel):
-    decisionId: Optional[str] = Field(..., description="Unique identifier for the evaluation")
-    status: Optional[Literal['ACCEPT_NO_UW','ACCEPT_WITH_UW','DECLINE','PENDED']] = Field(
+    decisionId: str = Field(..., description="Unique identifier for the evaluation")
+    status: Literal['ACCEPT_NO_UW','ACCEPT_WITH_UW','DECLINE','PENDED'] = Field(
         ..., description="Final underwriting decision status"
     )
-    underwritingRequired: Optional[bool] = Field(
+    underwritingRequired: bool = Field(
         ..., description="Whether manual underwriting is required"
     )
     reasons: List[Reason] = Field(
         default_factory=list, description="Reasons supporting the decision"
     )
-    planRestrictions: Optional[PlanRestrictions] = Field(
+    planRestrictions: PlanRestrictions = Field(
         default_factory=PlanRestrictions, description="Plan eligibility restrictions"
     )
-    waitingPeriod: Optional[WaitingPeriod] = Field(
+    waitingPeriod: WaitingPeriod = Field(
         default_factory=WaitingPeriod, description="Waiting period determination"
     )
     ratingGuidance: Optional[RatingGuidance] = Field(
         None, description="Recommended rating class and factor"
     )
-    requestsForInformation: Optional[List[str]] = Field(
+    requestsForInformation: List[str] = Field(
         default_factory=list, description="Additional information requested from applicant"
     )
     audit: Optional[dict] = Field(
@@ -168,7 +168,7 @@ class EvaluateResponse(BaseModel):
 
 
 class StateOverride(BaseModel):
-    state: Optional[str] = Field(..., description="State code the override applies to")
+    state: str = Field(..., description="State code the override applies to")
     continuousGi: bool = Field(False, description="Whether the state allows continuous GI rights")
     birthdayOrAnniversarySwitching: Optional[dict] = Field(
         None, description="Rules for switching plans during birthday/anniversary windows"

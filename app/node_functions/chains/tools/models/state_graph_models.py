@@ -22,6 +22,7 @@ class GroundingAgentResponse(BaseModel):
     grounding_agent_answer:Optional[str] = Field(default="", description="The final natural-language answer")
 class MedicareMessageGraph(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
+    uw_agent_messages: Annotated[list[BaseMessage], add_messages]
     # Input from the user
     user_query: Optional[str]
     error_message: Optional[str]

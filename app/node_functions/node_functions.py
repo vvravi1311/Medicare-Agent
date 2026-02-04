@@ -33,16 +33,25 @@ def product_agent_reason(state: MedicareMessageGraph):
                 "page_number": artifact.metadata["MY_page_number"]
             })
         return {"messages": [response],
-                "product_response": {"answer":response.content, "Audit":audit}} # When the product agent responds with final answer
+                "product_response":
+                    {"answer":response.content,
+                     "audit":audit}} # When the product agent responds with final answer
     return {"messages": [response]} # first time when the agent decides to call the tool
 
 def uw_agent_reason(state: MedicareMessageGraph):
-    response = uw_chain.invoke({"uw_messages": state["messages"]})
+    response = uw_chain.invoke({"uw_messages": state["uw_agent_messages"]})
     answer = response.content
-    if isinstance(state["messages"][LAST], ToolMessage):
+    if isinstance(state["uw_agent_messages"][LAST], ToolMessage):
         answer = response.content
-        return {"messages": [response],"underwriting_response": {"answer":response.content}}
-    return {"messages": [response],"underwriting_response": {"answer":response.content,"audit":[{"dummy-audit": "some value"}]}}
+        audit = {}
+        audit = json.loads(state["uw_agent_messages"][LAST].content)["audit"]
+        return {"uw_agent_messages": [response],
+                "underwriting_response":
+                    {"answer": response.content,
+                     "audit":[{"audit_info": audit}]}}
+    return {"uw_agent_messages": [response],
+            "underwriting_response": {"answer": response.content, "audit": [{"dummy-audit": "some value"}]}}
+
 
 def has_tool_message(result):
     # Case 1: result is a single message
@@ -78,5 +87,5 @@ def product_grounding_reason(state: MedicareMessageGraph):
     return {"grounding_agent_response": grounding_answer}
 
 # defining the tool_nodes
-uw_tool_node = ToolNode(uw_tools)
+uw_tool_node = ToolNode(uw_tools,messages_key="uw_agent_messages")
 product_tool_node=ToolNode(product_rag_tools)

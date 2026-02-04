@@ -55,7 +55,7 @@ def after_grounded_router(state: MedicareMessageGraph) -> str:
         return END
 
 def after_uw_router(state: MedicareMessageGraph) -> str:
-    if not state["messages"][LAST].tool_calls:
+    if not state["uw_agent_messages"][LAST].tool_calls:
         return END
     return UW_TOOL_NODE
 
@@ -95,14 +95,16 @@ medicare_graph.get_graph().draw_mermaid_png(output_file_path="medicare_flow_3.pn
 # def run_graph(query: str) -> Dict[str, Any]:
 def run_graph(query: str) -> MedicareMessageGraph:
     result = medicare_graph.invoke({"messages": [HumanMessage(
+        content=query)], "uw_agent_messages":[HumanMessage(
         content=query)]})
     # answer = result["messages"][LAST].content
     return result
 
 if __name__ == "__main__":
     print("Hello from Medicare Agent")
-    uw_query_1 = "a 67‑year‑old applicant who: Just left an employer group plan last month , Has several health conditions (COPD, diabetes, uses insulin) , Wants to enroll in Medigap Plan G , Has been on Medicare Part B for 18 months , Has no recent GI events except losing employer coverage , Has a hospitalization 45 days ago ,Uses oxygen at night. My question is - Does this client qualify for Guaranteed Issue because they just lost employer coverage, or do I need to submit them through full underwriting?"
-    uw_query = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026. Applicant is 65 years old, no prior coverage and no major health history"
+    combined_query = "a 67‑year‑old applicant who: Just left an employer group plan last month , Has several health conditions (COPD, diabetes, uses insulin) , Wants to enroll in Medigap Plan G , Has been on Medicare Part B for 18 months , Has no recent GI events except losing employer coverage , Has a hospitalization 45 days ago ,Uses oxygen at night. My question is - Does this client qualify for Guaranteed Issue because they just lost employer coverage, or do I need to submit them through full underwriting?"
+    uw_query_1 = "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026. Applicant is 65 years old, no prior coverage and no major health history"
+    uw_query_2 =       "Evaluate the Medicare application. Its for state of Georgia, the start date of the medicare insurance is from 1st February 2026."
     product_query_1 = "Explain Plan G"
     product_query_2 ="If I have Plan N, how much do I pay for an emergency room visit if I am admitted to the hospital?"
     combined_query="yet to add one"

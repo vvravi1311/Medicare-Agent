@@ -86,13 +86,11 @@ def _rating_guidance(tobacco: bool | None, height: int | None, weight: int | Non
 @tool()
 def evaluate(payload: EvaluateRequest) -> dict:
     """
-        Evaluate a Medicare application and return an underwriting decision.
-
+        Evaluate a Medicare application and generate a complete underwriting decision.
         Parameters
         ----------
         request : EvaluateRequest
             The request payload containing the Medicare application details.
-
         Returns
         -------
         response: EvaluateResponse
@@ -104,7 +102,10 @@ def evaluate(payload: EvaluateRequest) -> dict:
     appl = payload.applicant
     cov = payload.coverage
 
+    # if app and app.receivedDate:
     asof = _parse_date(app.receivedDate)
+    # else:
+    #     asof = date.today()
     dob = _parse_date(appl.dateOfBirth)
     partb = _parse_date(appl.partBEffectiveDate)
     medicare_elig = _parse_date(appl.medicareEligibilityDate) if appl.medicareEligibilityDate else None
