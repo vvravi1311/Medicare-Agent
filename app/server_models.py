@@ -1,5 +1,6 @@
 from pydantic import BaseModel
+from typing import Optional
 
 class InvokeRequest(BaseModel):
-    query: str
-    thread_id: str | None = None
+    query: Optional[str] = ""
+    thread_id: Optional[str] = ""

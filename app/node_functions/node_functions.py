@@ -84,7 +84,12 @@ def product_grounding_reason(state: MedicareMessageGraph):
         grounding_agent_answer=result.grounding_agent_answer )
     # grounding_answer.is_grounded = result[0].is_grounded
     # grounding_answer.grounding_agent_answer = result[0].grounding_agent_answer
-    return {"grounding_agent_response": grounding_answer}
+    # return {"grounding_agent_response": grounding_answer}
+    return {"grounding_agent_response" :
+                {"is_grounded": result.is_grounded,
+                "grounding_agent_answer":result.grounding_agent_answer}
+            }
+
 
 # defining the tool_nodes
 uw_tool_node = ToolNode(uw_tools,messages_key="uw_agent_messages")

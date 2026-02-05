@@ -4,6 +4,7 @@ from fastapi import FastAPI
 
 # project imports
 from .medicare_agent_graph_dummy import run_medicare_agent
+from .medicare_agent_graph import run_graph
 from .server_models import InvokeRequest
 
 
@@ -16,7 +17,7 @@ def health():
 @app.post("/medicare-agent")
 def medicare_agent(request: InvokeRequest):
     # config = {"configurable": {"thread_id": request.thread_id or "default"}}
-    result = run_medicare_agent(request)
+    result = run_graph(request)
     # final = result["messages"][-1].content
     pprint(result)
     return {"output": result}

@@ -10,6 +10,7 @@ from langgraph.graph.message import add_messages
 from app.node_functions.node_functions import uw_agent_reason,MedicareMessageGraph,categorize_agent_reason,product_agent_reason,product_grounding_reason
 from app.node_functions.chains.tools.models.constants import CATEGORIZE_AGENT_REASON,UW_AGENT_REASON,PRODUCT_AGENT_REASON,PRODUCT_GROUNDING_REASON,LAST,UW_TOOL_NODE,PRODUCT_TOOL_NODE,BOTH
 from app.node_functions.node_functions import uw_tool_node,product_tool_node
+from app.server_models import InvokeRequest
 
 # -----------------------------
 # Edge Router functions
@@ -92,11 +93,10 @@ medicare_graph.add_conditional_edges(PRODUCT_GROUNDING_REASON,after_grounded_rou
 medicare_graph = medicare_graph.compile()
 medicare_graph.get_graph().draw_mermaid_png(output_file_path="medicare_flow_3.png")
 
-# def run_graph(query: str) -> Dict[str, Any]:
-def run_graph(query: str) -> MedicareMessageGraph:
+def run_graph(InvokeRequest : InvokeRequest) -> MedicareMessageGraph:
     result = medicare_graph.invoke({"messages": [HumanMessage(
-        content=query)], "uw_agent_messages":[HumanMessage(
-        content=query)]})
+        content=InvokeRequest.query)], "uw_agent_messages":[HumanMessage(
+        content=InvokeRequest.query)]})
     # answer = result["messages"][LAST].content
     return result
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     combined_query="yet to add one"
     dummy_query = "hi"
 
-    result = run_graph(uw_query_1)
+    InvokeRequest = InvokeRequest(query=product_query_1)
+    result = run_graph(InvokeRequest)
     print("************************************************************************************ : Result")
     pprint(result)
-    # pprint(result["answer"])

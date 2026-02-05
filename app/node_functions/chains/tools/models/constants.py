@@ -1,4 +1,4 @@
-
+import os
 # agent node_functions
 PLANNER_AGENT = "planner_agent"
 
@@ -27,3 +27,6 @@ UW_TOOL_NODE="uw_tool_node"
 PRODUCT_TOOL_NODE="product_tool_node"
 BOTH="BOTH_NODES"
 
+# application keys ....
+LANGCHAIN_TRACING = os.environ.get("LANGCHAIN_TRACING")
+LANGCHAIN_PROJECT = os.environ.get("LANGCHAIN_PROJECT")
