@@ -1,0 +1,7 @@
+# Local development environment variables
+ENVIRONMENT=local
+LANGSMITH_TRACING=true
+LANGSMITH_API_KEY=
+LANGSMITH_PROJECT=medicare-agent-aws
+PINECONE_API_KEY=
+OPENAI_API_KEY=
