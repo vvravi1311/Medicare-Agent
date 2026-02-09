@@ -1,15 +1,16 @@
-from typing import TypedDict, Annotated, Any, Dict, Optional
 from pprint import pprint
 
-from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages import HumanMessage
 
-from langgraph.graph import MessagesState, StateGraph,END
-from langgraph.graph.message import add_messages
+from langgraph.graph import StateGraph,END
+# from langgraph.graph.message import add_messages
+
+# Load config first to set environment variables
+from app import config
 
 # project internal imports
-from app.node_functions.node_functions import uw_agent_reason,MedicareMessageGraph,categorize_agent_reason,product_agent_reason,product_grounding_reason
+from app.node_functions.node_functions import uw_tool_node,product_tool_node,uw_agent_reason,MedicareMessageGraph,categorize_agent_reason,product_agent_reason,product_grounding_reason
 from app.node_functions.chains.tools.models.constants import CATEGORIZE_AGENT_REASON,UW_AGENT_REASON,PRODUCT_AGENT_REASON,PRODUCT_GROUNDING_REASON,LAST,UW_TOOL_NODE,PRODUCT_TOOL_NODE,BOTH
-from app.node_functions.node_functions import uw_tool_node,product_tool_node
 from app.server_models import InvokeRequest
 
 # -----------------------------

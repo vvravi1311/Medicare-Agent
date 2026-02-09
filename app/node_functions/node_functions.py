@@ -1,13 +1,13 @@
-from typing import TypedDict, Annotated, Any, Dict, Optional,List
-
-from pydantic import BaseModel, Field
-from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage, AIMessage
-
-from dotenv import load_dotenv
-from langgraph.graph import MessagesState, StateGraph,END
+# from typing import TypedDict, Annotated, Any, Dict, Optional,List
+# from pydantic import BaseModel, Field
+from langchain_core.messages import ToolMessage
+# from dotenv import load_dotenv
+# from langgraph.graph import MessagesState, StateGraph,END
 from langgraph.prebuilt import ToolNode
 import json
-
+import asyncio
+import httpx
+from pprint import pprint
 # project internal imports
 from app.node_functions.chains.uw_chain import uw_chain
 from app.node_functions.chains.categorize_chain import categorize_chain
@@ -27,10 +27,15 @@ def product_agent_reason(state: MedicareMessageGraph):
         # product_agent_response = ProductAgentResponse()
         answer = response.content
         audit = []
+        # get teh audit details form the ToolMessage, the messageState has the last tool response. Make sure you get both source and page no form metadata
         for artifact in state["messages"][LAST].artifact:
             audit.append({
-                "source": artifact.metadata["source"],
-                "page_number": artifact.metadata["MY_page_number"]
+                # when its pydantic object (in langchain tools)
+                # "source": artifact.metadata["source"],
+                # "page_number": artifact.metadata["MY_page_number"]
+                # when its Dict (in MCP tools)
+                "source": artifact["metadata"]["source"],
+                "page_number": artifact["metadata"]["MY_page_number"]
             })
         return {"messages": [response],
                 "product_response":
@@ -93,4 +98,55 @@ def product_grounding_reason(state: MedicareMessageGraph):
 
 # defining the tool_nodes
 uw_tool_node = ToolNode(uw_tools,messages_key="uw_agent_messages")
-product_tool_node=ToolNode(product_rag_tools)
+# comment out langchain_tool_node
+# product_tool_node=ToolNode(product_rag_tools)
+
+
+MCP_SERVER_URL = "https://ld8gokydyk.execute-api.us-east-1.amazonaws.com/Prod/mcp/"  # Use this for Docker environment
+
+
+async def call_mcp_retrieve_documents(query: str, api_key: str) -> str:
+    """Call retrieve_documents tool on remote MCP server"""
+    headers = {"x-api-key": api_key, "Content-Type": "application/json"}
+    payload = {
+        "method": "tools/call",
+        "params": {
+            "name": "retrieve_documents",
+            "arguments": {"query": query}
+        }
+    }
+    async with httpx.AsyncClient() as client:
+        response = await client.post(MCP_SERVER_URL, json=payload, headers=headers, timeout=30.0)
+        result = response.json()
+        print("****************************   MCP RESPONSE   **************************************")
+        pprint(result)
+        print("***********   **************************************")
+        pprint(result.get("result", {}).get("content", [{}])[0].get("text", ""))
+        print("****************************   MCP RESPONSE   **************************************")
+        # add content and artifact
+
+        content = result.get("result", {}).get("content", [{}])[0].get("text", "")
+        artifact = []
+        # get teh audit details form the ToolMessage, the messageState has the last tool response. Make sure you get both source and page no form metadata
+        for arti in json.loads(json.loads((response.content).decode("utf-8"))["result"]["content"][-1]["text"]):
+            artifact.append({
+                "metadata":arti["metadata"]
+            })
+    # return result.get("result", {}).get("content", [{}])[0].get("text", "")
+        return content , artifact
+
+def product_tool_node(state: MedicareMessageGraph):
+    """Custom tool node that calls remote MCP server"""
+    import os
+    api_key = os.getenv("MCP_API_KEY", "L5M33bj1Dk6YfTDcn2xvE19u7faPnt9I1ElLMrNX")
+    last_message = state["messages"][-1]
+    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+        tool_call = last_message.tool_calls[0]
+        query = tool_call.get("args", {}).get("query", "")
+        content , artifact = asyncio.run(call_mcp_retrieve_documents(query, api_key))
+        tool_message = ToolMessage(content=content, artifact=artifact , tool_call_id=tool_call["id"])
+
+        print("****************************   TOOL MESSAGE   **************************************")
+        pprint({"messages": [tool_message]})
+        return {"messages": [tool_message]}
+    return {"messages": []}
