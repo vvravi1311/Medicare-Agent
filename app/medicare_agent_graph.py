@@ -9,7 +9,8 @@ from langgraph.graph import StateGraph,END
 from app import config
 
 # project internal imports
-from app.node_functions.node_functions import uw_tool_node,product_tool_node,uw_agent_reason,MedicareMessageGraph,categorize_agent_reason,product_agent_reason,product_grounding_reason
+from app.node_functions.node_functions import uw_tool_node,uw_agent_reason,MedicareMessageGraph,categorize_agent_reason,product_agent_reason,product_grounding_reason
+from app.node_functions.mcp_tools import product_tool_node
 from app.node_functions.chains.tools.models.constants import CATEGORIZE_AGENT_REASON,UW_AGENT_REASON,PRODUCT_AGENT_REASON,PRODUCT_GROUNDING_REASON,LAST,UW_TOOL_NODE,PRODUCT_TOOL_NODE,BOTH
 from app.server_models import InvokeRequest
 

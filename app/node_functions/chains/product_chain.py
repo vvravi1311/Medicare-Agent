@@ -3,7 +3,7 @@ from langchain_openai import ChatOpenAI
 
 # project internal imports
 from app.node_functions.chains.tools.models.constants import LAST,FIRST,PRODUCT_AGENT_MODEL,PRODUCT_GROUNDING_MODEL
-from app.node_functions.chains.tools.tools import product_rag_tools
+# from app.node_functions.chains.tools.tools import product_rag_tools
 from app.node_functions.chains.tools.models.state_graph_models import GroundingAgentResponse
 
 
@@ -21,8 +21,8 @@ product_rag_prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-product_rag_llm = ChatOpenAI(model=PRODUCT_AGENT_MODEL, temperature=0).bind_tools(product_rag_tools)
-product_rag_chain = product_rag_prompt | product_rag_llm
+# product_rag_llm = ChatOpenAI(model=PRODUCT_AGENT_MODEL, temperature=0).bind_tools(product_rag_tools)
+# product_rag_chain = product_rag_prompt | product_rag_llm
 
 product_grounding_prompt = ChatPromptTemplate.from_messages(
     [

@@ -11,8 +11,9 @@ from pprint import pprint
 # project internal imports
 from app.node_functions.chains.uw_chain import uw_chain
 from app.node_functions.chains.categorize_chain import categorize_chain
-from app.node_functions.chains.product_chain import product_grounding_chain,product_rag_chain
-from app.node_functions.chains.tools.tools import uw_tools,product_rag_tools
+from app.node_functions.chains.product_chain import product_grounding_chain
+from app.node_functions.mcp_tools import product_rag_chain
+from app.node_functions.chains.tools.tools import uw_tools
 from app.node_functions.chains.tools.models.constants import LAST,FIRST
 from app.node_functions.chains.tools.models.state_graph_models import MedicareMessageGraph,ProductAgentResponse,GroundingAgentResponse,AnyAgentResponse
 
@@ -28,7 +29,8 @@ def product_agent_reason(state: MedicareMessageGraph):
         answer = response.content
         audit = []
         # get teh audit details form the ToolMessage, the messageState has the last tool response. Make sure you get both source and page no form metadata
-        for artifact in state["messages"][LAST].artifact:
+        # for artifact in state["messages"][LAST].artifact:
+        for artifact in json.loads(json.loads(state["messages"][LAST].content)["result"]["content"][LAST]["text"]):
             audit.append({
                 # when its pydantic object (in langchain tools)
                 # "source": artifact.metadata["source"],
@@ -36,6 +38,8 @@ def product_agent_reason(state: MedicareMessageGraph):
                 # when its Dict (in MCP tools)
                 "source": artifact["metadata"]["source"],
                 "page_number": artifact["metadata"]["MY_page_number"]
+                # "source":json.loads(json.loads(state["messages"][LAST].content)["result"]["content"][-1]["text"])[0]["metadata"]["source"],
+                # "page_number": json.loads(json.loads(state["messages"][LAST].content)["result"]["content"][-1]["text"])[0]["metadata"]["MY_page_number"]
             })
         return {"messages": [response],
                 "product_response":
