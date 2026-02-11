@@ -15,16 +15,16 @@ vectorstore = PineconeVectorStore(
     index_name=PRODUCT_VECTOR_INDEX_NAME, embedding=embeddings
 )
 
-@tool(response_format="content_and_artifact")
-def retrieve_product_context(query: str):
-    """Retrieve relevant documentation to help answer answers Insurance agents' queries about Real-Time clause and Benefit lookup."""
-    # Retrieve top 4 most similar documents
-    retrieved_docs = vectorstore.as_retriever().invoke(query, k=K)
-
-    # Serialize documents for the model
-    serialized = "\n\n".join(
-        (f"Source: {doc.metadata.get('source', 'Unknown')}\n\nContent: {doc.page_content}")
-        for doc in retrieved_docs
-    )
-    # Return both serialized content and raw documents
-    return serialized, retrieved_docs
+# @tool(response_format="content_and_artifact")
+# def retrieve_product_context(query: str):
+#     """Retrieve relevant documentation to help answer answers Insurance agents' queries about Real-Time clause and Benefit lookup."""
+#     # Retrieve top 4 most similar documents
+#     retrieved_docs = vectorstore.as_retriever().invoke(query, k=K)
+#
+#     # Serialize documents for the model
+#     serialized = "\n\n".join(
+#         (f"Source: {doc.metadata.get('source', 'Unknown')}\n\nContent: {doc.page_content}")
+#         for doc in retrieved_docs
+#     )
+#     # Return both serialized content and raw documents
+#     return serialized, retrieved_docs

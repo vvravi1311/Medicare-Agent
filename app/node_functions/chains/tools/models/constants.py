@@ -21,6 +21,7 @@ CATEGORIZE_AGENT_REASON="categorize_agent_reason"
 UW_AGENT_REASON="uw_agent_reason"
 PRODUCT_AGENT_REASON="product_agent_reason"
 PRODUCT_GROUNDING_REASON="product_grounding_reason"
+JUDGE_REASON="judge_reason"
 LAST=-1
 FIRST=0
 UW_TOOL_NODE="uw_tool_node"
@@ -30,3 +31,5 @@ BOTH="BOTH_NODES"
 # application keys ....
 LANGCHAIN_TRACING = os.environ.get("LANGCHAIN_TRACING")
 LANGCHAIN_PROJECT = os.environ.get("LANGCHAIN_PROJECT")
+
+MCP_SERVER_URL = "https://ld8gokydyk.execute-api.us-east-1.amazonaws.com/Prod/mcp/"

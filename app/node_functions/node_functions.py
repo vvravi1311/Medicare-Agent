@@ -14,12 +14,15 @@ from app.node_functions.chains.categorize_chain import categorize_chain
 from app.node_functions.chains.product_chain import product_grounding_chain
 from app.node_functions.mcp_tools import product_rag_chain
 from app.node_functions.chains.tools.tools import uw_tools
-from app.node_functions.chains.tools.models.constants import LAST,FIRST
+from app.node_functions.chains.tools.models.constants import LAST,FIRST,MCP_SERVER_URL
 from app.node_functions.chains.tools.models.state_graph_models import MedicareMessageGraph,ProductAgentResponse,GroundingAgentResponse,AnyAgentResponse
-
+from app.node_functions.chains.judge_content import judge_chain
 
 def categorize_agent_reason(state: MedicareMessageGraph):
     response = categorize_chain.invoke({"categorize_messages": state["messages"]})
+    if response.content != "ELIGIBILITY_UNDERWRITING" or response.content != "PRODUCT":
+        final_answer = "The query is not a Medicare related query, Ican only answer medicare related queries"
+        return {"messages": [response],"agent_category":response.content, "user_query":state["messages"][FIRST].content, "final_answer": final_answer }
     return {"messages": [response],"agent_category":response.content, "user_query":state["messages"][FIRST].content }
 
 def product_agent_reason(state: MedicareMessageGraph):
@@ -47,6 +50,20 @@ def product_agent_reason(state: MedicareMessageGraph):
                      "audit":audit}} # When the product agent responds with final answer
     return {"messages": [response]} # first time when the agent decides to call the tool
 
+def judge_reason(state: MedicareMessageGraph):
+    question = state.get("user_query")
+    context = ""
+    if isinstance(state["messages"][LAST], ToolMessage):
+        context = json.loads(state["messages"][LAST].content)["result"]["content"][0]["text"]
+    result = judge_chain.invoke({
+            "question": question,
+            "context": context
+    })
+    if int(result.score) <= 3:
+        return {"judge_evaluation_score": result.score, "final_answer": result.evaluation}
+    else:
+        return {"judge_evaluation_score": result.score}
+
 def uw_agent_reason(state: MedicareMessageGraph):
     response = uw_chain.invoke({"uw_messages": state["uw_agent_messages"]})
     answer = response.content
@@ -60,7 +77,6 @@ def uw_agent_reason(state: MedicareMessageGraph):
                      "audit":[{"audit_info": audit}]}}
     return {"uw_agent_messages": [response],
             "underwriting_response": {"answer": response.content, "audit": [{"dummy-audit": "some value"}]}}
-
 
 def has_tool_message(result):
     # Case 1: result is a single message
@@ -91,9 +107,6 @@ def product_grounding_reason(state: MedicareMessageGraph):
     grounding_answer = GroundingAgentResponse(
         is_grounded=result.is_grounded,
         grounding_agent_answer=result.grounding_agent_answer )
-    # grounding_answer.is_grounded = result[0].is_grounded
-    # grounding_answer.grounding_agent_answer = result[0].grounding_agent_answer
-    # return {"grounding_agent_response": grounding_answer}
     return {"grounding_agent_response" :
                 {"is_grounded": result.is_grounded,
                 "grounding_agent_answer":result.grounding_agent_answer}
@@ -106,7 +119,7 @@ uw_tool_node = ToolNode(uw_tools,messages_key="uw_agent_messages")
 # product_tool_node=ToolNode(product_rag_tools)
 
 
-MCP_SERVER_URL = "https://ld8gokydyk.execute-api.us-east-1.amazonaws.com/Prod/mcp/"  # Use this for Docker environment
+  # Use this for Docker environment
 
 
 async def call_mcp_retrieve_documents(query: str, api_key: str) -> str:
