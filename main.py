@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 from pprint import pprint
 from typing import Any, Dict, List
-from app.medicare_agent_graph import run_graph
+import requests
 from langchain_core.messages import BaseMessage, HumanMessage
 from app.node_functions.chains.tools.models.constants import (
     LANGCHAIN_TRACING,
@@ -127,7 +127,12 @@ if prompt:
         try:
             with st.spinner("Retrieving docs and generating answer…"):
                 InvokeRequest = InvokeRequest(query=prompt, thread_id="1234")
-                result = run_graph(InvokeRequest)
+                response = requests.post(
+                    "http://127.0.0.1:8000/medicare-agent",
+                    json=InvokeRequest.model_dump()
+                )
+                response.raise_for_status()
+                result = response.json()
                 msg = {"role": "assistant"}
 
                 # Grounding agent response
