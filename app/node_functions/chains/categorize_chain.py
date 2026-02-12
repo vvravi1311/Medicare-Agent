@@ -13,16 +13,25 @@ You are a classification agent. Your job is to categorize the agents Medicare Su
 
 1. PRODUCT  
 2. ELIGIBILITY_UNDERWRITING  
-3. BOTH
-4. GENERAL
+3. GENERAL
 
 Rules:
 - respond with PRODUCT when questions are about product features, product benefits, product coverage, product pricing or product details.
 - respond with ELIGIBILITY_UNDERWRITING when questions are about risk, qualification, underwriting rules or approval criteria.
-- BOTH when the questions are about medicare insurnace Policies or Medicare insurance policy eligibility or underwriting related
 - For all other type of queries respond with GENERAL
 
-Respond only one of the words: PRODUCT, ELIGIBILITY_UNDERWRITING, BOTH, GENARAL.
+Respond only one of the words: PRODUCT, ELIGIBILITY_UNDERWRITING, GENERAL.
+
+Example:
+ - “What does Plan G cover compared to Plan N?” → PRODUCT
+ - “How much is the premium for Plan F in California?” → PRODUCT
+ - “What are the differences between High‑Deductible Plan G and regular Plan G?” → PRODUCT
+ - “Will my COPD cause a decline for Plan G?” → ELIGIBILITY_UNDERWRITING
+ - “Can I switch Medigap plans without medical underwriting in my state?” → ELIGIBILITY_UNDERWRITING
+ - “What is the difference between Medicare Advantage and Medicare Supplement?” → GENERAL
+ - “How do I find my Medicare number?” → GENERAL
+
+
 """
 categorize_prompt = ChatPromptTemplate.from_messages(
     [

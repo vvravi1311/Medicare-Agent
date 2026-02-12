@@ -30,7 +30,7 @@ def has_tool_message(result):
 def categorize_agent_reason(state: MedicareMessageGraph):
     response = categorize_chain.invoke({"categorize_messages": state["messages"]})
     if response.content != "ELIGIBILITY_UNDERWRITING" or response.content != "PRODUCT":
-        final_answer = "The query is not a Medicare related query, Ican only answer medicare related queries"
+        final_answer = "This is not a Medicare Product or Underwriting related query, I can only answer medicare PRODUCT and UNDERWRITING related queries"
         return {
             "messages": [response],
             "agent_category": response.content,
