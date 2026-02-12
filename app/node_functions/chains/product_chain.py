@@ -2,10 +2,15 @@ from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_openai import ChatOpenAI
 
 # project internal imports
-from app.node_functions.chains.tools.models.constants import LAST,FIRST,PRODUCT_AGENT_MODEL,PRODUCT_GROUNDING_MODEL
-# from app.node_functions.chains.tools.tools import product_rag_tools
-from app.node_functions.chains.tools.models.state_graph_models import GroundingAgentResponse
-
+from app.node_functions.chains.tools.models.constants import (
+    LAST,
+    FIRST,
+    PRODUCT_AGENT_MODEL,
+    PRODUCT_GROUNDING_MODEL,
+)
+from app.node_functions.chains.tools.models.state_graph_models import (
+    GroundingAgentResponse,
+)
 
 product_rag_prompt = ChatPromptTemplate.from_messages(
     [
@@ -15,14 +20,11 @@ product_rag_prompt = ChatPromptTemplate.from_messages(
             "You have access to a tool that retrieves relevant context from Evidence of coverage and Summary of Benefits documents "
             "Use the tool to find relevant information before answering questions. "
             "Always cite the source and page_num you use in your answers. "
-            "If you cannot find the answer in the retrieved documentation, say so."
+            "If you cannot find the answer in the retrieved documentation, say so.",
         ),
         MessagesPlaceholder(variable_name="product_rag_messages"),
     ]
 )
-
-# product_rag_llm = ChatOpenAI(model=PRODUCT_AGENT_MODEL, temperature=0).bind_tools(product_rag_tools)
-# product_rag_chain = product_rag_prompt | product_rag_llm
 
 product_grounding_prompt = ChatPromptTemplate.from_messages(
     [
@@ -63,17 +65,17 @@ product_grounding_prompt = ChatPromptTemplate.from_messages(
       "final_answer": "your grounded answer here"
     }}
     """),
-        # MessagesPlaceholder(variable_name="product_grounding_messages"),
     ]
 )
-# product_grounding_llm = ChatOpenAI(model=PRODUCT_GROUNDING_MODEL, temperature=0)
-product_grounding_llm = ChatOpenAI(model=PRODUCT_GROUNDING_MODEL, temperature=0).with_structured_output(GroundingAgentResponse)
+product_grounding_llm = ChatOpenAI(
+    model=PRODUCT_GROUNDING_MODEL, temperature=0
+).with_structured_output(GroundingAgentResponse)
 product_grounding_chain = (
-        {
-            "question": lambda x: x["question"],
-            "context": lambda x: x["context"],
-            "answer": lambda x: x["answer"]
-        }
-        | product_grounding_prompt
-        | product_grounding_llm
+    {
+        "question": lambda x: x["question"],
+        "context": lambda x: x["context"],
+        "answer": lambda x: x["answer"],
+    }
+    | product_grounding_prompt
+    | product_grounding_llm
 )

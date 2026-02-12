@@ -36,13 +36,14 @@ Output format (JSON):
 Return the output in the required JSON format only.
 """
 
-def create_judge_llm(model_id="amazon.nova-pro-v1:0", region="us-east-1"):
-    return ChatBedrock(
-        model_id=model_id,
-        region_name=region
-    )
 
-judge_llm = create_judge_llm().with_structured_output(JudgeAgentResponse)   # <-- instantiate here
+def create_judge_llm(model_id="amazon.nova-pro-v1:0", region="us-east-1"):
+    return ChatBedrock(model_id=model_id, region_name=region)
+
+
+judge_llm = create_judge_llm().with_structured_output(
+    JudgeAgentResponse
+)  # <-- instantiate here
 
 judge_prompt = ChatPromptTemplate.from_messages(
     [
@@ -51,10 +52,7 @@ judge_prompt = ChatPromptTemplate.from_messages(
 )
 
 judge_chain = (
-    {
-        "question": lambda x: x["question"],
-        "context": lambda x: x["context"]
-    }
+    {"question": lambda x: x["question"], "context": lambda x: x["context"]}
     | judge_prompt
     | judge_llm
 )

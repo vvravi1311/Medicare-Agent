@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from langchain_openai import ChatOpenAI
@@ -25,14 +26,10 @@ Respond only one of the words: PRODUCT, ELIGIBILITY_UNDERWRITING, BOTH, GENARAL.
 """
 categorize_prompt = ChatPromptTemplate.from_messages(
     [
-        ("system",
-         prompt_str
-        ),
+        ("system", prompt_str),
         MessagesPlaceholder(variable_name="categorize_messages"),
-    ])
+    ]
+)
 
 categorize_llm = ChatOpenAI(model=CATEGORIZE_AGENT_MODEL, temperature=0)
-# uw_llm = ChatOpenAI(model=UW_AGENT_MODEL, temperature=0, api_key=os.environ.get("OPENAI_API_KEY")).bind_tools(uw_tools)
 categorize_chain = categorize_prompt | categorize_llm
-
-
